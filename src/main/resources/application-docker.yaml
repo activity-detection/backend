@@ -1,0 +1,8 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://db:5432/activitydetectordb
+    username: user
+    password: password
+
+video:
+  folderPath: videos
