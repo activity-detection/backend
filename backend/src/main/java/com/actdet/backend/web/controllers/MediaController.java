@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Objects;
 
@@ -51,7 +52,7 @@ public class MediaController {
                                          @RequestParam(value = "description", required = false) String description,
                                          @RequestParam("relative-path") String pathToSaveIn){
         if(!Video.hasSupportedExtension(Objects.requireNonNull(file.getOriginalFilename()))) return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        videoStorageService.store(file, videoName, description, pathToSaveIn);
+        videoStorageService.store(file, videoName, description, Paths.get(pathToSaveIn));
         return ResponseEntity.ok().build();
     }
 

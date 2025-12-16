@@ -47,16 +47,18 @@ public class VideoService {
         //Potem musze lepiej obsłużyć ten wyjątek
     }
 
-    public void saveVideoDatabaseRecord(String videoName, String videoPath){
+    public void saveVideoDatabaseRecord(String videoName, Path videoPath){
         saveVideoDatabaseRecord(videoName, null, videoPath);
     }
 
-    public void saveVideoDatabaseRecord(String videoName, String description, String videoPath){
-        Video video = Video.builder().name(videoName).description(description).pathToFile(videoPath).build();
-        if(videoRepository.existsVideoByPathToFile(videoPath)){
+    public void saveVideoDatabaseRecord(String videoName, String description, Path videoPath){
+        String videoPathString = videoPath.toString();
+        Video video = Video.builder().name(videoName).description(description).pathToFile(videoPathString).build();
+        if(videoRepository.existsVideoByPathToFile(videoPathString)){
             return;
         }
         videoRepository.save(video);
+        logger.debug("Record saved to database: {}", video);
     }
 
     @Transactional

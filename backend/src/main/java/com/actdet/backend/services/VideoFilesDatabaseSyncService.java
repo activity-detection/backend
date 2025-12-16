@@ -104,7 +104,6 @@ public class VideoFilesDatabaseSyncService {
         pathMap.put(watchKey, dirPath);
     }
 
-    //Zwraca ilość zarejestrowanych folderow
     public void registerAll(Path dirPath, int subDirDepth) throws IOException {
         long registeredDirCount = 0;
         try(Stream<Path> fileStream = Files.walk(dirPath, subDirDepth)){
@@ -150,8 +149,6 @@ public class VideoFilesDatabaseSyncService {
                 }else if(kind == StandardWatchEventKinds.ENTRY_CREATE){
                     onFileCreated(child);
                 }
-                //Musze pamietac ze zmiana nazwy pliku to najpierw dla watchera jest rownoznaczna
-                //z najpierw DELETE a potem CREATE
             }
 
             boolean valid = key.reset();
@@ -182,10 +179,20 @@ public class VideoFilesDatabaseSyncService {
 
     private void onFileDeleted(Path deletedFilePath){
         if(Video.hasSupportedExtension(deletedFilePath)){
-            logger.info("Usunieto plik video: {}", deletedFilePath);
             this.videoService.deleteVideoDatabaseRecord(getVideoRelativePathString(deletedFilePath));
-
+            logger.debug("Usunieto plik video: {}. Record zostal usuniety", deletedFilePath);
         }
+        Path parentDir = deletedFilePath.getParent();
+        if(Files.exists(parentDir)){
+            try(DirectoryStream<Path> stream = Files.newDirectoryStream(parentDir)) {
+                if(!stream.iterator().hasNext()){
+                    Files.delete(parentDir);
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
     }
 
     private void onFileCreated(Path createdFilePath){
