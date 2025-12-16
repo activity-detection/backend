@@ -2,6 +2,8 @@ package com.actdet.backend.services;
 
 import com.actdet.backend.data.entities.Video;
 import com.actdet.backend.data.repositories.VideoRepository;
+import com.actdet.backend.services.exceptions.RecordNotFoundException;
+import com.actdet.backend.services.exceptions.RecordSavingException;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +14,7 @@ import org.springframework.stereotype.Service;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
@@ -42,23 +45,23 @@ public class VideoService {
     }
 
     private String getFilePathForId(String id){
-        return videoRepository.getPathById(Long.parseLong(id))
-                .orElseThrow(() -> new RuntimeException("Plik z podanym id ("+id+") nie istnieje!"));
-        //Potem musze lepiej obsłużyć ten wyjątek
+        return videoRepository.getPathById(UUID.fromString(id))
+                .orElseThrow(() -> new RecordNotFoundException("Plik z podanym id ("+id+") nie istnieje!"));
     }
 
     public void saveVideoDatabaseRecord(String videoName, Path videoPath){
         saveVideoDatabaseRecord(videoName, null, videoPath);
     }
 
-    public void saveVideoDatabaseRecord(String videoName, String description, Path videoPath){
+    public Video saveVideoDatabaseRecord(String videoName, String description, Path videoPath){
         String videoPathString = videoPath.toString();
         Video video = Video.builder().name(videoName).description(description).pathToFile(videoPathString).build();
         if(videoRepository.existsVideoByPathToFile(videoPathString)){
-            return;
+            throw new RecordSavingException("Cannot save file under already existing path");
         }
-        videoRepository.save(video);
+        video = videoRepository.save(video);
         logger.debug("Record saved to database: {}", video);
+        return video;
     }
 
     @Transactional

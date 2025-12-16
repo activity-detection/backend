@@ -6,10 +6,11 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 @Repository
-public interface VideoRepository extends JpaRepository<Video, Long> {
+public interface VideoRepository extends JpaRepository<Video, UUID> {
     boolean existsVideoByPathToFile(String pathToFile);
 
     void deleteVideoByPathToFile(String pathToFile);
@@ -18,6 +19,6 @@ public interface VideoRepository extends JpaRepository<Video, Long> {
     Stream<String> streamAllVideoPaths();
 
     @Query("SELECT v.pathToFile FROM Video v WHERE v.id = :id")
-    Optional<String> getPathById(long id);
+    Optional<String> getPathById(UUID id);
 
 }

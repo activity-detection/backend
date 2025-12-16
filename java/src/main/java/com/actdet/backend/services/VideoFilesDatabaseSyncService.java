@@ -1,6 +1,7 @@
 package com.actdet.backend.services;
 
 import com.actdet.backend.data.entities.Video;
+import com.actdet.backend.services.exceptions.VideoFilesWatcherException;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import org.slf4j.Logger;
@@ -36,6 +37,8 @@ public class VideoFilesDatabaseSyncService {
     public VideoFilesDatabaseSyncService(@Value("${activity-detector.video.folderPath}") String relativeFolderPath,
                                          @Value("${activity-detector.video.subfolderDepth}") int subfolderDepth,
                                          VideoService videoService) throws IOException {
+        //Uwzględnienie katalogów datowanych
+        subfolderDepth+=1;
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setCorePoolSize(1);
         executor.setMaxPoolSize(1);
@@ -189,7 +192,7 @@ public class VideoFilesDatabaseSyncService {
                     Files.delete(parentDir);
                 }
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                logger.error("Nie udalo sie usunac pozostałych pustych katalogów po usunięciu pliku video.");
             }
         }
 

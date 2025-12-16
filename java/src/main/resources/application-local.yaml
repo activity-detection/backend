@@ -4,3 +4,10 @@ spring:
     username: user
     password: password
 
+logging:
+  level:
+    com.actdet.backend: DEBUG
+
+activity-detector:
+  controllers:
+    show-error-details-in-response: true
