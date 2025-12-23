@@ -4,6 +4,7 @@ import com.actdet.backend.data.entities.Video;
 import com.actdet.backend.data.entities.VideoDetails;
 import com.actdet.backend.data.repositories.VideoRepository;
 import com.actdet.backend.services.VideoStorageService;
+import com.actdet.backend.web.controllers.bodies.ResponseVideoBody;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.support.ResourceRegion;
 import org.springframework.http.*;
@@ -43,8 +44,8 @@ public class MediaController {
 
     //Tymczasowy endpoint do podgladu jakie pliki sie zapisaly
     @GetMapping("")
-    public List<Video> getAllVideos(){
-        return videoRepository.findAll();
+    public List<ResponseVideoBody> getAllVideos(){
+        return videoRepository.findAll().stream().map(ResponseVideoBody::new).toList();
     }
 
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
