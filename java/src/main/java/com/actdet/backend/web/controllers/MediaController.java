@@ -1,6 +1,7 @@
 package com.actdet.backend.web.controllers;
 
 import com.actdet.backend.data.entities.Video;
+import com.actdet.backend.data.entities.VideoDetails;
 import com.actdet.backend.data.repositories.VideoRepository;
 import com.actdet.backend.services.VideoStorageService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,9 +51,11 @@ public class MediaController {
     public ResponseEntity<?> uploadVideo(@RequestParam("file") MultipartFile file,
                                          @RequestParam("video-name") String videoName,
                                          @RequestParam(value = "description", required = false) String description,
-                                         @RequestParam("relative-path") String pathToSaveIn){
+                                         @RequestParam("relative-path") String pathToSaveIn,
+                                         @RequestPart(value = "details", required = true) VideoDetails detailsJson){
         if(!Video.hasSupportedExtension(Objects.requireNonNull(file.getOriginalFilename()))) return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        videoStorageService.store(file, videoName, description, Paths.get(pathToSaveIn));
+
+        videoStorageService.store(file, videoName, description, Paths.get(pathToSaveIn), detailsJson);
         return ResponseEntity.ok().build();
     }
 

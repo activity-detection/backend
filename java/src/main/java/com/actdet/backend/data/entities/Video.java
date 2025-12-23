@@ -33,7 +33,6 @@ public class Video {
 
     @Id
     @GeneratedValue
-    @JdbcTypeCode(SqlTypes.UUID)
     @Column(name = "video_id", columnDefinition = "uuid")
     private UUID id;
 
@@ -49,10 +48,19 @@ public class Video {
     @Column(name = "video_path", length = 255, nullable = false, unique = true)
     private String pathToFile;
 
+    @OneToOne(
+            mappedBy = "video",
+            orphanRemoval = true,
+            cascade = CascadeType.ALL
+    )
+    private VideoDetails videoDetails;
+
+
     @Builder
-    public Video(String name, String description, String pathToFile) {
+    public Video(String name, String description, String pathToFile, VideoDetails details) {
         this.name = name;
         this.description = description;
         this.pathToFile = pathToFile;
+        this.videoDetails = details;
     }
 }

@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -16,6 +17,7 @@ import java.io.IOException;
 import java.nio.file.*;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 @Service
@@ -82,6 +84,8 @@ public class VideoFilesDatabaseSyncService {
         logger.info("Watcher stopped.");
     }
 
+
+    @Scheduled(fixedDelay = 6, timeUnit = TimeUnit.HOURS)
     protected void syncData() {
         long deletedRecordCount = videoService.deleteNonExistentVideoRecords();
         if(deletedRecordCount != 0){

@@ -1,6 +1,7 @@
 package com.actdet.backend.services;
 
 import com.actdet.backend.data.entities.Video;
+import com.actdet.backend.data.entities.VideoDetails;
 import com.actdet.backend.services.exceptions.FileSavingException;
 import com.actdet.backend.services.exceptions.RecordSavingException;
 import com.actdet.backend.services.exceptions.RequestException;
@@ -9,7 +10,6 @@ import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.io.InputStreamSource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourceRegion;
 import org.springframework.http.HttpHeaders;
@@ -22,14 +22,10 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Stream;
 
 @Service
 public class VideoStorageService {
@@ -58,7 +54,7 @@ public class VideoStorageService {
     }
 
     @Transactional
-    public void store(MultipartFile file, String videoName, String description, Path filePathToSaveIn){
+    public void store(MultipartFile file, String videoName, String description, Path filePathToSaveIn, VideoDetails details){
         if(file.isEmpty()){
             throw new FileSavingException("Cannot save empty file");
         }
@@ -91,7 +87,7 @@ public class VideoStorageService {
             }
             fileCreated = true;
 
-            this.videoService.saveVideoDatabaseRecord(videoName, description, Paths.get(timestampString).resolve(savedFileName));
+            this.videoService.saveVideoDatabaseRecord(videoName, description, Paths.get(timestampString).resolve(savedFileName), details);
         } catch (IOException e) {
             throw new FileSavingException("Failed to store video file on local.");
         } catch (RuntimeException e){
@@ -105,7 +101,7 @@ public class VideoStorageService {
             throw new RecordSavingException("Failed to save video record in database.");
         }
 
-        logger.debug("Dodano plik video: {}", storePath);
+        logger.debug("Video file has been stored: {}", storePath);
 
     }
 

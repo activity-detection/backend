@@ -10,8 +10,8 @@ CREATE TABLE videos (
                         video_path VARCHAR(255) NOT NULL UNIQUE
 );
 
-CREATE TABLE video_detections(
+CREATE TABLE video_details(
     video_id UUID PRIMARY KEY,
-    detection_json JSONB,
+    details_json JSONB,
     CONSTRAINT fk_videos_video_detections FOREIGN KEY (video_id) REFERENCES videos(video_id) ON DELETE CASCADE
 );

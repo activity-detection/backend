@@ -1,6 +1,8 @@
 package com.actdet.backend.services;
 
 import com.actdet.backend.data.entities.Video;
+import com.actdet.backend.data.entities.VideoDetails;
+import com.actdet.backend.data.repositories.VideoDetailsRepository;
 import com.actdet.backend.data.repositories.VideoRepository;
 import com.actdet.backend.services.exceptions.RecordNotFoundException;
 import com.actdet.backend.services.exceptions.RecordSavingException;
@@ -25,13 +27,15 @@ public class VideoService {
     private final Path videoFolderPath;
     private final int maxDepth;
     private final VideoRepository videoRepository;
-
+    private final VideoDetailsRepository videoDetailsRepository;
     @Autowired
     public VideoService(@Value("${activity-detector.video.folderPath}") String relativeFolderPath,
                         @Value("${activity-detector.video.subfolderDepth}") int subfolderDepth,
-                        VideoRepository videoRepository) {
+                        VideoRepository videoRepository,
+                        VideoDetailsRepository videoDetailsRepository) {
         this.maxDepth = subfolderDepth;
         this.videoRepository = videoRepository;
+        this.videoDetailsRepository = videoDetailsRepository;
         //Aktualnie sciezka do katalogu jest wzgledem katalogu w ktorym uruchamiamy projekt
         Path baseDir = Paths.get("").toAbsolutePath();
 
@@ -53,15 +57,27 @@ public class VideoService {
         saveVideoDatabaseRecord(videoName, null, videoPath);
     }
 
-    public Video saveVideoDatabaseRecord(String videoName, String description, Path videoPath){
+    public void saveVideoDatabaseRecord(String videoName, Path videoPath, VideoDetails detailsJson){
+        saveVideoDatabaseRecord(videoName, null, videoPath, detailsJson);
+    }
+
+    public void saveVideoDatabaseRecord(String videoName, String description, Path videoPath){
+        saveVideoDatabaseRecord(videoName, description, videoPath, null);
+    }
+
+    public void saveVideoDatabaseRecord(String videoName, String description, Path videoPath, VideoDetails details){
         String videoPathString = videoPath.toString();
         Video video = Video.builder().name(videoName).description(description).pathToFile(videoPathString).build();
         if(videoRepository.existsVideoByPathToFile(videoPathString)){
             throw new RecordSavingException("Cannot save file under already existing path");
         }
         video = videoRepository.save(video);
+        if(details!=null){
+            details.setVideo(video);
+            videoDetailsRepository.save(details);
+        }
+
         logger.debug("Record saved to database: {}", video);
-        return video;
     }
 
     @Transactional
